@@ -21,7 +21,7 @@ POSCARを入力とし、以下の手順を自動化するスクリプト群。qs
 - `create_run_vasp_bandgap_cal.sh` : バンドギャップ計算のためのDFTを行うスクリプトを生成するスクリプト
 - `calculate_bandgap.sh` : バンドギャップ計算を行ったDOSCARから、バンドギャップを計算するC＋＋ファイルを生成し、バンドギャップ計算を行うスクリプト
 
-#　結果ファイル
+# 結果ファイル
 - `bandgap_result.csv` : bandgapの計算結果が入ったファイル。なお、nonmetal列が1ならば、bandgapはゼロである。（入力された値はDOSCARにおけるステップ幅なので、無意味）。例として入っているfcc_Siは導体なので、nonmetal列が1になっている。
 - `workspace__*/kptest.dat` : K点収束計算の結果
 - `workspace__*/encut_test.dat` :  INCARにおけるENCUTの収束計算の結果
