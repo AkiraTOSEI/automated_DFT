@@ -57,23 +57,30 @@ cp DOSCAR ../final_DOSCAR
 cp POSCAR ../final_POSCAR
 
 g++ -o calculate_bandgap calculate_bandgap.cpp -std=c++11
-E_fermi=\$(grep "E-fermi" ../final_OUTCAR | awk '{print $3}')
+E_fermi=\$(grep "E-fermi" ../final_OUTCAR | awk '{print \$3}')
 OUTPUT_FILE="../../bandgap_result.csv"
 
 # outputが存在するかどうかをチェック
 if [ -e $OUTPUT_FILE ]; then
     # ファイルが存在する場合、通常のlsの結果をファイルに出力
-    ./calculate_bandgap $E_fermi >> $OUTPUT_FILE
+    ./calculate_bandgap \$E_fermi >> \$OUTPUT_FILE
 else
     # ファイルが存在しない場合、隠しファイルを含むls -aの結果をファイルに出力
-    echo 'file_name, bandgap, nonmetal' > $OUTPUT_FILE
-    ./calculate_bandgap $E_fermi >> $OUTPUT_FILE
+    echo 'file_name, bandgap, nonmetal' > \$OUTPUT_FILE
+    ./calculate_bandgap \$E_fermi >> \$OUTPUT_FILE
 fi
+
+
+cd ../
+
+# 特定のファイル以外を削除
+rm -rf bandgap_cal
+shopt -s extglob
+rm -f !(final_OUTCAR|final_DOSCAR|final_POCAR|used_POTCAR.txt|kptest.dat|encut_test.dat)
 
 date
 
 
-cd ../
 
 EOF
 echo "run_vasp_bandgap.sh file has been successfully created"
@@ -97,7 +104,7 @@ int main(int argc, char *argv[]) {
     }   
     
     double eFermi = std::stod(argv[1]); // コマンドラインからeFermiの値を受け取る
-    std::string doscarPath = "final_DOSCAR"; // DOSCARファイルのパスを適宜設定してください
+    std::string doscarPath = "../final_DOSCAR"; // DOSCARファイルのパスを適宜設定してください
     std::ifstream doscarFile(doscarPath);
     std::string line;
     double a = 0, b = 0, c = 0;
