@@ -1,0 +1,2 @@
+
+/home/share/VASP/potpaw_PBE.54/Si/POTCAR
