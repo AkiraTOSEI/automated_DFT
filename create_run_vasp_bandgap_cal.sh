@@ -26,8 +26,21 @@ NPROCS=\$(cat \$PBS_NODEFILE | wc -l)
 ######     bandgap       ##########
 #################################
 
+
+# 最終計算用のディレクトリを作り、必要なファイルを移動させる。
+mkdir -p bandgap_cal
+cp POTCAR KPOINTS calculate_bandgap.cpp ./bandgap_cal
+cd bandgap_cal
+
+echo "################################################"
+echo "################################################"
+echo "###  VASP calculation for  Bandgap starts!  ###"
+echo "################################################"
+echo "################################################"
+echo ""
+
 # ENCUTの収束後値をもとに、bandgap計算用のINCARを作成する.
-ENCUT=\$(tail -n -1 encut_cutoff.dat | awk '{print \$1}')
+ENCUT=\$(tail -n -1 ../encut_cutoff.dat | awk '{print \$1}')
 echo "bandap calculation INCAR" > INCAR
 echo "ISTART = 1" >> INCAR
 echo "ICHARG = 11" >> INCAR
@@ -43,19 +56,6 @@ echo "NELM = 200" >> INCAR
 echo "NPAR = 4" >> INCAR
 echo "LORBIT = 11" >> INCAR
 echo "NEDOS = 2000" >> INCAR
-
-# 最終計算用のディレクトリを作り、必要なファイルを移動させる。
-mkdir -p bandgap_cal
-cp POTCAR KPOINTS CHGCAR INCAR calculate_bandgap.cpp ./bandgap_cal
-cp CONTCAR ./bandgap_cal/POSCAR
-cd bandgap_cal
-
-echo "################################################"
-echo "################################################"
-echo "###  VASP calculation for  Bandgap starts!  ###"
-echo "################################################"
-echo "################################################"
-echo ""
 
 mpiexec -iface ib0 -launcher rsh -machinefile \$PBS_NODEFILE -ppn 16 /home/share/VASP/vasp.5.4.4
 
@@ -74,7 +74,7 @@ OUTPUT_FILE="../../bandgap_result.csv"
 echo "E_fermi: \$E_fermi"
 
 # outputが存在するかどうかをチェック
-if [ -e $OUTPUT_FILE ]; then
+if [ -e \$OUTPUT_FILE ]; then
     # ファイルが存在する場合、通常のlsの結果をファイルに出力
     ./calculate_bandgap \$E_fermi >> \$OUTPUT_FILE
 else
@@ -90,9 +90,9 @@ echo "#######################################"
 cd ../
 
 # 特定のファイル以外を削除
-#rm -rf bandgap_cal
-#shopt -s extglob
-#rm -f !(final_OUTCAR|final_DOSCAR|final_POSCAR|used_POTCAR.txt|kptest.dat|encut_test.dat)
+rm -rf bandgap_cal final_sc
+shopt -s extglob
+rm -f !(final_OUTCAR|final_DOSCAR|final_POSCAR|used_POTCAR.txt|kptest.dat|encut_test.dat)
 
 date
 
