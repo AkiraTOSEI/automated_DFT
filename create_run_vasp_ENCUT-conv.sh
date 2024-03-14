@@ -17,17 +17,19 @@ export I_MPI_COMPATIBILITY=4
 NPROCS=\$(cat \$PBS_NODEFILE | wc -l)
 
 
+echo "#######################################################"
+echo "#######################################################"
+echo "###  VASP calculation for ENCUT convergence starts! ###"
+echo "#######################################################"
+echo "#######################################################"
+echo ""
 
-
-
-#################################
-### ENCUT Convergence ##########
-#################################
 
 # 収束判定を初期化
 ENCUT_result=FALSE
 
 EOF
+
 
 i=1
 for cutoff in 200 250 300 350 400 450 500 550 600 650 700 750 800; do
@@ -73,6 +75,9 @@ done
 cat >> run_vasp_ENCUT-conv.sh <<EOF
 hostname
 date
+echo "#######################################################"
+echo "###  VASP calculation for ENCUT convergence ends!   ###"
+echo "#######################################################"
 EOF
 echo "run_vasp_ENCUT-conv.sh file has been successfully created"
 

@@ -50,7 +50,18 @@ cp POTCAR KPOINTS CHGCAR INCAR calculate_bandgap.cpp ./bandgap_cal
 cp CONTCAR ./bandgap_cal/POSCAR
 cd bandgap_cal
 
+echo "################################################"
+echo "################################################"
+echo "###  VASP calculation for  Bandgap starts!  ###"
+echo "################################################"
+echo "################################################"
+echo ""
+
 mpiexec -iface ib0 -launcher rsh -machinefile \$PBS_NODEFILE -ppn 16 /home/share/VASP/vasp.5.4.4
+
+echo "#######################################"
+echo "###            VASP ends!           ###"
+echo "#######################################"
 
 cp OUTCAR ../final_OUTCAR
 cp DOSCAR ../final_DOSCAR
@@ -59,6 +70,8 @@ cp POSCAR ../final_POSCAR
 g++ -o calculate_bandgap calculate_bandgap.cpp -std=c++11
 E_fermi=\$(grep "E-fermi" ../final_OUTCAR | awk '{print \$3}')
 OUTPUT_FILE="../../bandgap_result.csv"
+
+echo "E_fermi: \$E_fermi"
 
 # outputが存在するかどうかをチェック
 if [ -e $OUTPUT_FILE ]; then
@@ -70,13 +83,16 @@ else
     ./calculate_bandgap \$E_fermi >> \$OUTPUT_FILE
 fi
 
+echo "#######################################"
+echo "###     bandgap cpp ends!           ###"
+echo "#######################################"
 
 cd ../
 
 # 特定のファイル以外を削除
-rm -rf bandgap_cal
-shopt -s extglob
-rm -f !(final_OUTCAR|final_DOSCAR|final_POCAR|used_POTCAR.txt|kptest.dat|encut_test.dat)
+#rm -rf bandgap_cal
+#shopt -s extglob
+#rm -f !(final_OUTCAR|final_DOSCAR|final_POSCAR|used_POTCAR.txt|kptest.dat|encut_test.dat)
 
 date
 

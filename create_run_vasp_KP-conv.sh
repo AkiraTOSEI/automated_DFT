@@ -26,9 +26,12 @@ NPROCS=\$(cat \$PBS_NODEFILE | wc -l)
 
 
 
-#################################
-### KPOINT Convergence ##########
-#################################
+echo "#######################################################"
+echo "#######################################################"
+echo "###  VASP calculation for ENCUT convergence stars!  ###"
+echo "#######################################################"
+echo "#######################################################"
+
 
 # 収束判定を初期化
 result=FALSE
@@ -81,6 +84,9 @@ done < kpoints_candidate.csv
 cat >> run_vasp_KP-conv.sh <<EOF
 hostname
 date
+echo "#######################################################"
+echo "###  VASP calculation for ENCUT convergence ends!   ###"
+echo "#######################################################"
 EOF
 echo "run_vasp_KP-conv.sh file has been successfully created"
 

@@ -37,12 +37,23 @@ echo "EDIFFG = -1.0e-2" >> INCAR
 echo "ISIF = 3" >> INCAR
 echo "NPAR = 4" >> INCAR
 
+
+echo "################################################"
+echo "################################################"
+echo "###  VASP calculation for  Relax starts!     ###"
+echo "################################################"
+echo "################################################"
+echo ""
+
 mpiexec -iface ib0 -launcher rsh -machinefile \$PBS_NODEFILE -ppn 16 /home/share/VASP/vasp.5.4.4
 
 
 hostname
 date
 
+echo "#######################################"
+echo "###           Relax Ends!           ###"
+echo "#######################################"
 EOF
 echo "run_vasp_relax.sh file has been successfully created"
 
