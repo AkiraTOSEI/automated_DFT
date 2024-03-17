@@ -4,6 +4,12 @@
 
 
 
+# コマンドライン引数から.vaspファイルのパスを取得
+if [ "$#" -ne 1 ]; then
+    echo "Usage: $0 <RELAX>"
+    exit 1
+fi
+RELAX="$1"
 
 cat > run_vasp_aft_relax_sc.sh <<EOF
 #!/bin/sh
@@ -12,6 +18,9 @@ cat > run_vasp_aft_relax_sc.sh <<EOF
 cd \$PBS_O_WORKDIR
 export I_MPI_COMPATIBILITY=4
 NPROCS=\$(cat \$PBS_NODEFILE | wc -l)
+
+
+
 
 
 
@@ -24,9 +33,23 @@ NPROCS=\$(cat \$PBS_NODEFILE | wc -l)
 mkdir -p final_sc
 mkdir -p bandgap_cal
 cp POTCAR KPOINTS ./final_sc
-cp CONTCAR ./final_sc/POSCAR
-cp CONTCAR ./bandgap_cal/POSCAR
+EOF
 
+if [ "$RELAX" = "YES" ]; then
+    cat >> run_vasp_aft_relax_sc.sh <<EOF
+    cp CONTCAR ./final_sc/POSCAR
+    cp CONTCAR ./bandgap_cal/POSCAR
+EOF
+elif [ "$RELAX" = "NO" ]; then
+    cat >> run_vasp_aft_relax_sc.sh <<EOF
+    cp POSCAR ./final_sc/POSCAR
+    cp POSCAR ./bandgap_cal/POSCAR
+EOF
+else
+    echo "<RELAX> argment error!!!!!!!! "
+fi
+
+cat >> run_vasp_aft_relax_sc.sh <<EOF
 cd final_sc
 
 # ENCUTの収束後値をもとに、sc計算用のINCARを作成する.
