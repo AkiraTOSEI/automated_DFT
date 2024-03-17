@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 # コマンドライン引数から.vaspファイルのパスを取得
 if [ "$#" -ne 1 ]; then
@@ -7,8 +7,9 @@ if [ "$#" -ne 1 ]; then
 fi
 FILE_REL_PATH="$1"
 PRECISION="${2:-high}" # precision引数がなければ、デフォルトで'high'を使用
-KP_CONV_THRES="${3:-0.03}" # precision引数がなければ、デフォルトで'0.05'を使用
-EN_CONV_THRES="${3:-0.0001}" # precision引数がなければ、デフォルトで'0.05'を使用
+KP_CONV_THRES="${3:-0.03}" # KP_CONV_THRES引数がなければ、デフォルトで'0.05'を使用
+EN_CONV_THRES="${4:-0.0001}" # KN_CONV_THRES引数がなければ、デフォルトで'0.05'を使用
+RELAX="${5:-NO}" # Relax引数がなければ、デフォルトで'NO'を使用
 
 # ファイルの存在を確認
 if [ ! -f "$FILE_REL_PATH" ]; then
@@ -24,7 +25,7 @@ WORK_DIR="workspace__"
 WORK_DIR="$WORK_DIR""$(basename "$FILE_PATH")"
 mkdir -p $WORK_DIR
 cp create_conv_cpp.sh create_INCAR.sh create_POSCAR.sh create_POTCAR.sh generate_kpoints.py ./$WORK_DIR
-cp create_run_vasp_KP-conv.sh create_run_vasp_ENCUT-conv.sh create_run_vasp_relax.sh sh create_run_vasp_aft_relax_sc.sh create_run_vasp_bandgap_cal.sh calculate_bandgap.sh ./$WORK_DIR
+cp create_run_vasp_KP-conv.sh create_run_vasp_ENCUT-conv.sh create_run_vasp_relax.sh create_run_vasp_aft_relax_sc.sh create_run_vasp_bandgap_cal.sh calculate_bandgap.sh ./$WORK_DIR
 cd $WORK_DIR
 
 # 収束判定のファイルを作る
@@ -46,9 +47,9 @@ sh create_run_vasp_KP-conv.sh  $FILE_PATH
 # ENCUTの収束のスクリプトを書く
 sh create_run_vasp_ENCUT-conv.sh $FILE_PATH
 # 緩和計算のスクリプトを書く
-sh create_run_vasp_relax.sh
+sh create_run_vasp_relax.sh $RELAX
 # 緩和計算後のsc計算のスクリプトを書く
-sh create_run_vasp_aft_relax_sc.sh
+sh create_run_vasp_aft_relax_sc.sh $RELAX
 # bandgap計算のスクリプトを書く(OUTCARからの抽出も含む)
 sh create_run_vasp_bandgap_cal.sh $FILE_PATH
 
