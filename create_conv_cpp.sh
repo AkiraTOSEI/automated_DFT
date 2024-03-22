@@ -31,7 +31,7 @@ bool is_converged(const std::vector<double>& energies) {
     if (diff >= -1*$thres) {
       consecutive_converged++;
 
-      if (consecutive_converged == 2) {
+      if (consecutive_converged == 3) {
         return true;
       }
     } else {

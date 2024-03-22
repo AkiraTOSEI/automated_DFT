@@ -66,6 +66,8 @@ echo "#######################################"
 cp OUTCAR ../final_OUTCAR
 cp DOSCAR ../final_DOSCAR
 cp POSCAR ../final_POSCAR
+cp KPOINTS ../final_KPOINTS
+cp INCAR ../final_INCAR
 
 g++ -o calculate_bandgap calculate_bandgap.cpp -std=c++11
 E_fermi=\$(grep "E-fermi" ../final_OUTCAR | awk '{print \$3}')
@@ -92,7 +94,7 @@ cd ../
 # 特定のファイル以外を削除
 rm -rf bandgap_cal final_sc
 shopt -s extglob
-rm -f !(final_OUTCAR|final_DOSCAR|final_POSCAR|used_POTCAR.txt|kptest.dat|encut_test.dat)
+rm -f !(final_INCAR|final_KPOINTS|final_OUTCAR|final_DOSCAR|final_POSCAR|used_POTCAR.txt|kptest.dat|encut_test.dat)
 
 date
 
