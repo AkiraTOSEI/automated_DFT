@@ -26,9 +26,20 @@ def calculate_kpoints_adjusted(file_path: str) -> list:
             kpoints_list.append(multiplied_vectors.tolist())
     return kpoints_list
 
+
+def list_element_check(a:list,b:list):
+    assert len(a) == len(b)
+    same_elem_exist = False
+    for i in range(len(a)):
+        if a[i] == b[i]:
+            same_elem_exist = True
+    return same_elem_exist
+
+
 def calculate_rounded_kpoints(file_path: str) -> list:
     kpoints_list = calculate_kpoints_adjusted(file_path)
     rounded_kpoints_list = [np.round(kpoint).astype(int).tolist() for kpoint in kpoints_list]
+    # 通常の収束判定用のファイル
     new_list = []
     for kpoints in rounded_kpoints_list:
         if not all(value >= 1 for value in kpoints):
@@ -36,8 +47,26 @@ def calculate_rounded_kpoints(file_path: str) -> list:
         if len(new_list) == 0:
             new_list.append(kpoints)
         elif not kpoints == new_list[-1]:
+            #elif not list_element_check(kpoints, new_list[-1]):
             new_list.append(kpoints)
-    return new_list[:10]
+    
+    
+    # 収束しなかった時用に、正方晶のKPOINTSを用意する
+    new_list2 = []
+    for kpoints in rounded_kpoints_list:
+        k = kpoints[0]
+        if not all(value >= 1 for value in kpoints):
+            continue
+        if len(new_list2) == 0:
+            new_list2.append([k, k, k])
+        elif not [k, k, k] == new_list2[-1]:
+            #elif not list_element_check(kpoints, new_list[-1]):
+            new_list2.append([k, k, k])
+    
+    
+    return new_list[:10] + new_list2[:10]
+
+
 
 def main():
     if len(sys.argv) < 1:
