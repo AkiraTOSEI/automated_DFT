@@ -26,11 +26,11 @@ NPROCS=\$(cat \$PBS_NODEFILE | wc -l)
 
 
 
-echo "#######################################################"
-echo "#######################################################"
-echo "###  VASP calculation for ENCUT convergence stars!  ###"
-echo "#######################################################"
-echo "#######################################################"
+echo "########################################################"
+echo "########################################################"
+echo "###  VASP calculation for KPOINTS convergence stars! ###"
+echo "########################################################"
+echo "########################################################"
 
 
 # 収束判定を初期化
@@ -48,7 +48,7 @@ else
     # Append k-points processing commands to run_vasp_KP-conv.sh
     ### create KPOINTS file
     # K-point: $kx $ky $kz
-    echo "Processing k-point $kx $ky \kz"
+    echo "Processing k-point $kx $ky $kz"
     echo "k-points" > KPOINTS
     echo "0" >> KPOINTS
     echo "Monkhorst Pack" >> KPOINTS
@@ -57,7 +57,11 @@ else
     
     ### calculcation
     mpiexec -iface ib0 -launcher rsh -machinefile \$PBS_NODEFILE -ppn 16 /home/share/VASP/vasp.5.4.4
-    energy=\$(grep 'free ' OUTCAR | tail -1 | awk '{print \$5}')
+    energy=\$(grep 'free  ' OUTCAR | tail -1 | awk '{print \$5}')
+    # 何らかのエラーでエネルギーが取得できなかった場合は0を入れる。
+    if [[ -z "\${energy// }" ]]; then
+        energy="0.0" 
+    fi 
 fi
 EOF
 
@@ -85,7 +89,7 @@ cat >> run_vasp_KP-conv.sh <<EOF
 hostname
 date
 echo "#######################################################"
-echo "###  VASP calculation for ENCUT convergence ends!   ###"
+echo "###  VASP calculation for KPOINTS convergence ends! ###"
 echo "#######################################################"
 EOF
 echo "run_vasp_KP-conv.sh file has been successfully created"
