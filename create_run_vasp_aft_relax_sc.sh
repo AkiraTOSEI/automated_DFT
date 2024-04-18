@@ -32,7 +32,8 @@ NPROCS=\$(cat \$PBS_NODEFILE | wc -l)
 # 最終計算用のディレクトリを作り、必要なファイルを移動させる。
 mkdir -p final_sc
 mkdir -p bandgap_cal
-cp POTCAR KPOINTS ./final_sc
+
+cp POTCAR  ./final_sc
 EOF
 
 if [ "$RELAX" = "YES" ]; then
@@ -42,23 +43,38 @@ if [ "$RELAX" = "YES" ]; then
 EOF
 elif [ "$RELAX" = "NO" ]; then
     cat >> run_vasp_aft_relax_sc.sh <<EOF
-    cp POSCAR ./final_sc/POSCAR
-    cp POSCAR ./bandgap_cal/POSCAR
+    cp POSCAR_gt ./final_sc/POSCAR
+    cp POSCAR_gt ./bandgap_cal/POSCAR
 EOF
 else
     echo "<RELAX> argment error!!!!!!!! "
 fi
 
+
 cat >> run_vasp_aft_relax_sc.sh <<EOF
+
 cd final_sc
 
 # ENCUTの収束後値をもとに、sc計算用のINCARを作成する.
-ENCUT=\$(tail -n -1 ../encut_cutoff.dat | awk '{print \$1}')
+BEST_ENCUT=\$(cat ../BEST_ENCUT.dat)
 echo "final sc-calculation INCAR" > INCAR
 ecoo "ISTART = 0 ; ICHARG = 2" >> INCAR
-echo "ENCUT = \$ENCUT" >> INCAR
+echo "\$BEST_ENCUT" >> INCAR
 echo "ISMEAR = -5; SIGMA = 0.1" >> INCAR
 echo "PREC = accurate" >> INCAR
+echo "EDIFF = 1.0e-6 # default:10^-4, SCF計算の収束条件,推奨は1E-6らしい。" >> INCAR
+
+# ENCUTの収束後値をもとに、sc計算用のINCARを作成する.
+BEST_KPOINTS=\$(cat ../BEST_KPOINTS.dat)
+echo "BEST KPOINTS"
+echo "k-points" > KPOINTS
+echo "0" >> KPOINTS
+echo "Monkhorst Pack" >> KPOINTS
+echo "\$BEST_KPOINTS" >> KPOINTS
+echo "0 0 0" >> KPOINTS
+
+
+
 
 
 echo "################################################"

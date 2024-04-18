@@ -36,6 +36,18 @@ elif [ "$RELAX" = "YES" ]; then
     ######     Relax       ##########
     #################################
     
+    # ENCUTの収束後値をもとに、sc計算用のINCARを作成する.
+    cp POSCAR_gt POSCAR
+
+    # ENCUTの収束後値をもとに、sc計算用のINCARを作成する.
+    BEST_KPOINTS=\$(cat BEST_KPOINTS.dat)
+    echo "BEST KPOINTS"
+    echo "k-points" > KPOINTS
+    echo "0" >> KPOINTS
+    echo "Monkhorst Pack" >> KPOINTS
+    echo "\$BEST_KPOITS" >> KPOINTS
+    echo "0 0 0" >> KPOINTS
+    
     # ENCUTの値をもとに、INCARファイルを作成する
     ENCUT=\$(tail -n -1 encut_cutoff.dat | awk '{print \$1}')
     
@@ -43,7 +55,7 @@ elif [ "$RELAX" = "YES" ]; then
     echo "ISTART = 0" >> INCAR
     echo "ICHARG = 1" >> INCAR
     echo "ISPIN = 1" >> INCAR
-    echo "ENCUT = \$ENCUT" >> INCAR
+    echo "\$BEST_ENCUT" >> INCAR
     echo "EDIFF = 1.0e-4" >> INCAR
     echo "LWAVE = .F." >> INCAR
     echo "ISMEAR = -5" >> INCAR

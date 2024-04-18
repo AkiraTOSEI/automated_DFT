@@ -4,7 +4,7 @@
 CPP_FILE="convergence_checker.cpp"
 L2_NORM_FILE="l2_norm.cpp"
 CONV_SUMMARY="convergence_summary.cpp"
-
+CAL_VOL="calculate_vol.cpp"
 # INCARファイルの内容を定義
 cat > $CPP_FILE << EOF
 #include <iostream>
@@ -206,5 +206,53 @@ int main(int argc, char* argv[]) {
 
 EOF
 
-echo "convergence.cpp, l2_norm.cpp, convergence_summary.cpp files have been successfully created."
+cat > $CAL_VOL << EOF
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <cmath>
+#include <string>
+
+int main(int argc, char* argv[]) {
+    // Check if the file name is provided
+    if (argc != 2) {
+        std::cerr << "Usage: " << argv[0] << " <force.dat>" << std::endl;
+        return 1;
+    }
+
+    // Open the file
+    std::ifstream file(argv[1]);
+    if (!file) {
+        std::cerr << "Error opening file." << std::endl;
+        return 1;
+    }
+
+    std::string line;
+    double x, y, z;
+
+    // Read each line of the file
+    while (getline(file, line)) {
+        std::istringstream iss(line);
+
+        // Read the three values from the line
+        if (!(iss >> x >> y >> z)) {
+            std::cerr << "Failed to read three values from line." << std::endl;
+            continue;
+        }
+
+        // Calculate the L2 norm of the vector (x, y, z)
+        double vol = x * y * z;
+
+        // Output the L2 norm
+        std::cout << vol << std::endl;
+    }
+
+    file.close();
+    return 0;
+}
+
+
+EOF
+
+echo "convergence.cpp, l2_norm.cpp, convergence_summary.cpp, calculate_vol.cpp files have been successfully created."
 
