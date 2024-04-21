@@ -6,10 +6,8 @@ if [ "$#" -ne 1 ]; then
     exit 1
 fi
 FILE_REL_PATH="$1"
-PRECISION="${2:-high}" # precision引数がなければ、デフォルトで'high'を使用
-KP_CONV_THRES="${3:-0.01}" # KP_CONV_THRES引数がなければ、デフォルトで'0.05'を使用
-EN_CONV_THRES="${4:-0.0001}" # KN_CONV_THRES引数がなければ、デフォルトで'0.05'を使用
-RELAX="${5:-NO}" # Relax引数がなければ、デフォルトで'NO'を使用
+RELAX="${2:-YES}" # Relax引数がなければ、デフォルトで'NO'を使用
+PRECISION="${3:-high}" # precision引数がなければ、デフォルトで'high'を使用
 
 # ファイルの存在を確認
 if [ ! -f "$FILE_REL_PATH" ]; then

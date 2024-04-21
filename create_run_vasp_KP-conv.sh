@@ -104,8 +104,7 @@ g++ -std=c++11 -o calculate_vol calculate_vol.cpp
 g++ -std=c++11 -o convergence_summary convergence_summary.cpp
 
 # 原子数を取得する
-total_lines=\$(wc -l < POSCAR)
-NUM_ATOM=\$((total_lines - 8))
+NUM_ATOM=\$(sed -n '7p' POSCAR | awk '{sum=0; for (i=1; i<=NF; i++) sum+=\$i; print sum}')
 
 # Pressureの最終値との差分が5 GPa, 絶対値が5 GPa以下になるようにする. 
 # VASPでは圧力単位がKilo Barなので、GPaにへんかんするために0.1をかける
@@ -133,6 +132,16 @@ awk '{print \$3, \$6, \$9, \$12}' __tmp_conv.dat > convergence_KP.dat
 BEST_KPOINTS=\$(./convergence_summary kpoints.dat convergence_KP.dat )
 echo  \$BEST_KPOINTS > BEST_KPOINTS.dat
 rm __*.dat
+
+# BEST_KPOINTSファイルの存在、内容、及び数値のチェック
+if [ ! -f BEST_KPOINTS.dat ] || [ ! -s BEST_KPOINTS.dat ] || ! grep -q '[0-9]' BEST_KPOINTS.dat; then
+  echo "エラー: 'BEST_KPOINTS.dat' ファイルが存在しないか、中身が空、または数値が含まれていません。"
+  exit 1
+else
+  echo "'BEST_KPOINTS.dat' ファイルは正常に存在し、中身に数値が含まれています。"
+  # ここにBEST_KPOINTSファイル用の処理を書く
+fi
+
 
 hostname
 date

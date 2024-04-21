@@ -38,7 +38,7 @@ EOF
 
 
 i=1
-for cutoff in 200 250 300 350 400 450 500 550 600 650 700 750 800; do
+for cutoff in 300 350 400 450 500 550 600 650 700 750 800 850 900; do
     cat >> run_vasp_ENCUT-conv.sh <<EOF
 ### create INCAR file
 # INCAR fo ENCUT: $cutoff
@@ -82,8 +82,7 @@ g++ -std=c++11 -o calculate_l2_norm l2_norm.cpp
 g++ -std=c++11 -o convergence_summary convergence_summary.cpp
 
 # 原子数を取得する
-total_lines=\$(wc -l < POSCAR)
-NUM_ATOM=\$((total_lines - 8))
+NUM_ATOM=\$(sed -n '7p' POSCAR | awk '{sum=0; for (i=1; i<=NF; i++) sum+=\$i; print sum}')
 
 # Pressureの最終値との差分が5 GPa, 絶対値が5 GPa以下になるようにする. 
 # VASPでは圧力単位がKilo Barなので、GPaにへんかんするために0.1をかける
@@ -106,6 +105,16 @@ awk '{print \$3, \$6, \$9, \$12}' __tmp_conv.dat > convergence_EN.dat
 BEST_ENCUT=\$(./convergence_summary ENCUT.dat convergence_EN.dat )
 echo  "ENCUT = \$BEST_ENCUT" > BEST_ENCUT.dat
 rm __*.dat
+
+# BEST_ENCUTファイルの存在、内容、及び数値のチェック
+if [ ! -f BEST_ENCUT.dat ] || [ ! -s BEST_ENCUT.dat ] || ! grep -q '[0-9]' BEST_ENCUT.dat; then
+  echo "エラー: 'BEST_ENCUT.dat' ファイルが存在しないか、中身が空、または数値が含まれていません。"
+  exit 1
+else
+  echo "'BEST_ENCUT.dat' ファイルは正常に存在し、中身に数値が含まれています。"
+  # ここにBEST_ENCUTファイル用の処理を書く
+fi
+
 hostname
 date
 

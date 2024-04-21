@@ -38,8 +38,8 @@ EOF
 
 if [ "$RELAX" = "YES" ]; then
     cat >> run_vasp_aft_relax_sc.sh <<EOF
-    cp CONTCAR ./final_sc/POSCAR
-    cp CONTCAR ./bandgap_cal/POSCAR
+    cp ./relax_cal/CONTCAR ./final_sc/POSCAR
+    cp ./relax_cal/CONTCAR ./bandgap_cal/POSCAR
 EOF
 elif [ "$RELAX" = "NO" ]; then
     cat >> run_vasp_aft_relax_sc.sh <<EOF

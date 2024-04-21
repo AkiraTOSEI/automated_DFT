@@ -42,26 +42,13 @@ def calculate_rounded_kpoints(file_path: str) -> list:
     # 通常の収束判定用のファイル
     new_list = []
     for kpoints in rounded_kpoints_list:
-        if not all(value >= 1 for value in kpoints):
+        if not all(value > 1 for value in kpoints):
             continue
         if len(new_list) == 0:
             new_list.append(kpoints)
         elif not kpoints == new_list[-1]:
             #elif not list_element_check(kpoints, new_list[-1]):
             new_list.append(kpoints)
-    
-    
-    # 収束しなかった時用に、正方晶のKPOINTSを用意する
-    new_list2 = []
-    for kpoints in rounded_kpoints_list:
-        k = kpoints[0]
-        if not all(value >= 1 for value in kpoints):
-            continue
-        if len(new_list2) == 0:
-            new_list2.append([k, k, k])
-        elif not [k, k, k] == new_list2[-1]:
-            #elif not list_element_check(kpoints, new_list[-1]):
-            new_list2.append([k, k, k])
     
     
     return new_list[:12]
