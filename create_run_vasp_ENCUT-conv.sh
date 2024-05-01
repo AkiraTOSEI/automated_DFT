@@ -38,7 +38,7 @@ EOF
 
 
 i=1
-for cutoff in 300 350 400 450 500 550 600 650 700 750 800 850 900; do
+for cutoff in 300 350 400 450 500 550 600 650 700 750 800 850 900 950 1000; do
     cat >> run_vasp_ENCUT-conv.sh <<EOF
 ### create INCAR file
 # INCAR fo ENCUT: $cutoff
@@ -127,7 +127,8 @@ echo "ENCUT = \$BEST_ENCUT" >> INCAR
 echo "ISMEAR = -5; SIGMA = 0.1" >> INCAR
 echo "PREC = accurate" >> INCAR
 echo "EDIFF = 1.0e-6 # default:10^-4, SCF計算の収束条件,推奨は1E-6らしい。" >> INCAR
-
+echo "ISYM = -1" >> INCAR 
+echo "SYMPREC = 0.00000001" >> INCAR
 
 echo "INCAR file has been successfully created."
 
