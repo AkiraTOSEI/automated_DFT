@@ -58,11 +58,13 @@ cd final_sc
 # ENCUTの収束後値をもとに、sc計算用のINCARを作成する.
 BEST_ENCUT=\$(cat ../BEST_ENCUT.dat)
 echo "final sc-calculation INCAR" > INCAR
-ecoo "ISTART = 0 ; ICHARG = 2" >> INCAR
+echo "ISTART = 0 ; ICHARG = 2" >> INCAR
 echo "\$BEST_ENCUT" >> INCAR
 echo "ISMEAR = -5; SIGMA = 0.1" >> INCAR
 echo "PREC = accurate" >> INCAR
 echo "EDIFF = 1.0e-6 # default:10^-4, SCF計算の収束条件,推奨は1E-6らしい。" >> INCAR
+cat ../INCAR_tail >> INCAR
+
 
 # ENCUTの収束後値をもとに、sc計算用のINCARを作成する.
 BEST_KPOINTS=\$(cat ../BEST_KPOINTS.dat)

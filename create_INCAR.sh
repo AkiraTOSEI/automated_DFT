@@ -9,6 +9,8 @@ System = default
 ISTART = 0 ; ICHARG = 2
 ENCUT = 240
 ISMEAR = -5; SIGMA = 0.1
+ISYM = -1
+SYMPREC = 0.00000001
 EOF
 
 echo "INCAR file has been successfully created."

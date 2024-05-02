@@ -71,7 +71,7 @@ echo "NSW = 1000" >> INCAR
 echo "EDIFFG = -1.0e-2" >> INCAR
 echo "ISIF = 3" >> INCAR
 echo "NPAR = 4" >> INCAR
-
+cat ../INCAR_tail >> INCAR
 
 echo "################################################"
 echo "################################################"

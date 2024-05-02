@@ -66,6 +66,7 @@ echo "NELM = 200 # default:60, SC計算の最大回数を指定" >> INCAR
 #echo "NPAR = 4 # defalut:コア数、並列計算に使うコア数" >> INCAR
 echo "LORBIT = 11 # default: None, 11:DOSCAR, PROCARを出力" >> INCAR
 echo "NEDOS = 2000 #default:301, DOS計算のグリッド数" >> INCAR
+cat ../INCAR_tail >> INCAR
 
 mpiexec -iface ib0 -launcher rsh -machinefile \$PBS_NODEFILE -ppn 16 /home/share/VASP/vasp.5.4.4
 
@@ -106,9 +107,9 @@ echo "#######################################"
 cd ../
 
 # 特定のファイル以外を削除
-rm -rf bandgap_cal final_sc relax_cal
-shopt -s extglob
-rm -f !(POSCAR_gt|POSCAR_distorted|final_INCAR|final_KPOINTS|final_OUTCAR|final_DOSCAR|final_POSCAR|used_POTCAR.txt|kp_history.dat|encut_history.dat)
+#rm -rf bandgap_cal final_sc relax_cal
+#shopt -s extglob
+#rm -f !(POSCAR_gt|POSCAR_distorted|final_INCAR|final_KPOINTS|final_OUTCAR|final_DOSCAR|final_POSCAR|used_POTCAR.txt|kp_history.dat|encut_history.dat)
 
 date
 
