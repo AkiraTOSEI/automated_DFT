@@ -1,12 +1,13 @@
 #!/bin/bash
 
 # Check if a file name is provided as the first argument
-if [ "$#" -ne 1 ]; then
+if [ "$#" -ne 2 ]; then
   echo "Usage: $0 <FILE_NAME>"
   exit 1
 fi
 
 FILE_NAME="$1"
+CONV_CALCULATION="$2"
 
 cat > run_vasp_ENCUT-conv.sh <<EOF
 #!/bin/sh
@@ -17,17 +18,45 @@ export I_MPI_COMPATIBILITY=4
 NPROCS=\$(cat \$PBS_NODEFILE | wc -l)
 
 
-echo "#######################################################"
-echo "#######################################################"
+
+
+EOF
+
+
+
+if [ $CONV_CALCULATION -eq 0 ]; then
+  echo "ENCUT = 520" > BEST_ENCUT.dat
+  cat >> run_vasp_ENCUT-conv.sh <<EOF
+echo "########################################################"
+echo "          No ENCUT convergence calculation"  
+echo "########################################################"
+EOF
+  exit 1
+elif [ $CONV_CALCULATION -eq 1 ]; then
+  cat >> run_vasp_ENCUT-conv.sh <<EOF
+echo "########################################################"
+echo "########################################################"
 echo "###  VASP calculation for ENCUT convergence starts! ###"
-echo "#######################################################"
-echo "#######################################################"
-echo ""
+echo "########################################################"
+echo "########################################################"
+
+cp POSCAR_distorted POSCAR
+
+# 収束判定を初期化
+EOF
+else
+  echo "2nd argment is wrong in create_run_vasp_ENCUT-conv.sh"
+  exit 1
+fi
+
+
+
+cat >> run_vasp_ENCUT-conv.sh <<EOF
 
 cp POSCAR_distorted POSCAR
 
 ### create KPOINTS file
-echo "k-point 10 10 10 initial"
+echo "k-point initial"
 echo "k-points" > KPOINTS
 echo "0" >> KPOINTS
 echo "Monkhorst Pack" >> KPOINTS

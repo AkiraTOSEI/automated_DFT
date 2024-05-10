@@ -51,7 +51,7 @@ def calculate_rounded_kpoints(file_path: str) -> list:
             new_list.append(kpoints)
     
     
-    return new_list[:12]
+    return new_list[2:16]
 
 
 

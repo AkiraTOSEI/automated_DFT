@@ -1,23 +1,9 @@
-#!/bin/bash
-
-
-
-
-# コマンドライン引数から.vaspファイルのパスを取得
-if [ "$#" -ne 1 ]; then
-    echo "Usage: $0 <VASP_FILE_PATH>"
-    exit 1
-fi
-FILE_PATH="$1"
-
-
-cat > run_vasp_bandgap.sh <<EOF
 #!/bin/sh
 #PBS -l nodes=1:ppn=16
 #PBS relax
-cd \$PBS_O_WORKDIR
+cd $PBS_O_WORKDIR
 export I_MPI_COMPATIBILITY=4
-NPROCS=\$(cat \$PBS_NODEFILE | wc -l)
+NPROCS=$(cat $PBS_NODEFILE | wc -l)
 
 
 
@@ -39,22 +25,22 @@ echo "################################################"
 echo ""
 
 # ENCUTの収束後値をもとに、sc計算用のINCARを作成する.
-BEST_KPOINTS=\$(cat ../BEST_KPOINTS.dat)
+BEST_KPOINTS=$(cat ../BEST_KPOINTS.dat)
 echo "BEST KPOINTS"
 echo "k-points" > KPOINTS
 echo "0" >> KPOINTS
 echo "Monkhorst Pack" >> KPOINTS
-echo "\$BEST_KPOINTS" >> KPOINTS
+echo "$BEST_KPOINTS" >> KPOINTS
 echo "0 0 0" >> KPOINTS
 
 
 # ENCUTの収束後値をもとに、bandgap計算用のINCARを作成する.
-BEST_ENCUT=\$(cat ../BEST_ENCUT.dat)
+BEST_ENCUT=$(cat ../BEST_ENCUT.dat)
 echo "bandap calculation INCAR" > INCAR
 echo "ISTART = 1 #default:1, 0:scratch, 1:WAVECARを読む、なければ0になる " >> INCAR
 echo "ICHARG = 11 #default:2(ISTART=0)0,else:0, 0:初期波動関数から電荷を計算,2:原子電荷の重ね合わせを使う,11:CHGCAR利用" >> INCAR
 echo "ISPIN = 2 # default:1, 1:スピン分極なし、2:スピン分極あり" >> INCAR
-echo "\$BEST_ENCUT" >> INCAR
+echo "$BEST_ENCUT" >> INCAR
 echo "EDIFF = 1.0e-6 # default:10^-4, SCF計算の収束条件,推奨は1E-6らしい。" >> INCAR
 echo "LWAVE = .F. # WAVECARを出力するか" >> INCAR
 echo "ISMEAR = -5 # default:1,部分占有軌道の設定、絶縁体・半導体では-5を推奨 " >> INCAR
@@ -67,7 +53,7 @@ echo "LORBIT = 11 # default: None, 11:DOSCAR, PROCARを出力" >> INCAR
 echo "NEDOS = 2000 #default:301, DOS計算のグリッド数" >> INCAR
 cat ../INCAR_tail >> INCAR
 
-mpiexec -iface ib0 -launcher rsh -machinefile \$PBS_NODEFILE -ppn 16 /home/share/VASP/vasp.5.4.4
+mpiexec -iface ib0 -launcher rsh -machinefile $PBS_NODEFILE -ppn 16 /home/share/VASP/vasp.5.4.4
 
 echo "#######################################"
 echo "###            VASP ends!           ###"
@@ -83,19 +69,19 @@ cp INCAR ../final_INCAR
 # 最初の8行をスキップし、4列以上のデータを含む行を無視
 tail -n +9 DOSCAR | awk 'NF <= 5 { print }' > tmp_DOSCAR
 
-E_fermi=\$(grep "E-fermi" ../final_OUTCAR | awk '{print \$3}')
+E_fermi=$(grep "E-fermi" ../final_OUTCAR | awk '{print $3}')
 OUTPUT_FILE="../../bandgap_result.csv"
 
-echo "E_fermi: \$E_fermi"
+echo "E_fermi: $E_fermi"
 
 # outputが存在するかどうかをチェック
-if [ -e \$OUTPUT_FILE ]; then
+if [ -e $OUTPUT_FILE ]; then
     # ファイルが存在する場合、通常のlsの結果をファイルに出力
-    python calculate_bandgap.py -f \$E_fermi >> \$OUTPUT_FILE
+    python calculate_bandgap.py -f $E_fermi >> $OUTPUT_FILE
 else
     # ファイルが存在しない場合、隠しファイルを含むls -aの結果をファイルに出力
-    echo 'file_name, bandgap, nonmetal' > \$OUTPUT_FILE
-    python calculate_bandgap.py -f \$E_fermi >> \$OUTPUT_FILE
+    echo 'file_name, bandgap, nonmetal' > $OUTPUT_FILE
+    python calculate_bandgap.py -f $E_fermi >> $OUTPUT_FILE
 fi
 
 echo "#######################################"
@@ -113,60 +99,3 @@ date
 
 
 
-EOF
-echo "run_vasp_bandgap.sh file has been successfully created"
-
-
-
-
-
-# bandgap計算ファイルの内容を定義
-cat > calculate_bandgap.py << EOF
-import pandas as pd
-import argparse
-
-def analyze_dos(e_fermi=None):
-    if e_fermi is None:
-        raise ValueError("Fermi energy must be specified.")
-    
-    # Load data
-    dos = pd.read_csv('tmp_DOSCAR', delim_whitespace=True, header=None)
-    dos = dos.rename(columns={0: 'Energy', 1: 'DOS(UP)', 2: 'DOS(DOWN)', 3: 'Integ_DOS(UP)', 4: 'Integ_DOS(DOWN)'})
-    
-    # Calculate if energy values are above the Fermi level
-    dos['AboveEf'] = dos['Energy'] - float(e_fermi) > 0
-    
-    # Get the energy, DOS(UP), DOS(DOWN) of the first point above the Fermi level
-    energy, dup, ddown = dos[dos['AboveEf']].head(1)[['Energy', 'DOS(UP)', 'DOS(DOWN)']].values.tolist()[0]
-    
-    if dup > 0 or ddown > 0:
-        non_metal = False
-        band_gap = 0
-    else:
-        non_metal = True
-        
-        # Get Energy of the top of the valence band
-        top_VB_idx = dos[dos['AboveEf']].index[0] - 1
-        top_VB_energy = dos['Energy'].loc[top_VB_idx]
-        
-        # Get Energy of the bottom of the conduction band
-        dos_above_Ef = dos[dos['AboveEf']][['Energy', 'DOS(UP)', 'DOS(DOWN)']]
-        dos_above_Ef['state_exist'] = (dos_above_Ef[['DOS(UP)', 'DOS(DOWN)']] > 0).any(axis=1)
-        bottom_CB_energy = dos_above_Ef[dos_above_Ef['state_exist']].head(1)['Energy'].values[0]
-        
-        band_gap = bottom_CB_energy - top_VB_energy
-    
-    print('$FILE_PATH' ,f', {band_gap:.3f}, {non_metal}')
-
-def main():
-    parser = argparse.ArgumentParser(description="Analyze DOS data for band gaps.")
-    parser.add_argument("-f", "--fermi", type=float, required=True, help="Fermi energy level")
-    
-    args = parser.parse_args()
-    analyze_dos(args.fermi)
-
-if __name__ == "__main__":
-    main()
-EOF
-
-echo "calculate_bandgap.py file has been successfully created"

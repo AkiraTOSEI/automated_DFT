@@ -1,12 +1,13 @@
 #!/bin/bash
 
 # Check if a file name is provided as the first argument
-if [ "$#" -ne 1 ]; then
+if [ "$#" -ne 2 ]; then
   echo "Usage: $0 <FILE_NAME>"
   exit 1
 fi
 
 FILE_NAME="$1"
+CONV_CALCULATION="$2"
 
 # Ensure kpoints_candidate.csv exists
 if [ ! -f "kpoints_candidate.csv" ]; then
@@ -25,8 +26,19 @@ NPROCS=\$(cat \$PBS_NODEFILE | wc -l)
 
 
 
+EOF
 
+if [ $CONV_CALCULATION -eq 0 ]; then
+  python create_kpoints.py > BEST_KPOINTS.dat
+  cat >> run_vasp_KP-conv.sh <<EOF
 echo "########################################################"
+echo "          No KPOINT convergence calculation"  
+echo "########################################################"
+EOF
+  exit 1
+elif [ $CONV_CALCULATION -eq 1 ]; then
+  cat >> run_vasp_KP-conv.sh <<EOF
+
 echo "########################################################"
 echo "###  VASP calculation for KPOINTS convergence stars! ###"
 echo "########################################################"
@@ -35,8 +47,13 @@ echo "########################################################"
 cp POSCAR_distorted POSCAR
 
 # 収束判定を初期化
-
 EOF
+else
+  echo "2nd argment is wrong in create_run_vasp_KP-conv.sh"
+  exit 1
+fi
+
+
 
 i=1
 while IFS=, read -r kx ky kz; do
