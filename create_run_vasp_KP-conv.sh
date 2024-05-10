@@ -1,12 +1,13 @@
 #!/bin/bash
 
 # Check if a file name is provided as the first argument
-if [ "$#" -ne 1 ]; then
+if [ "$#" -ne 2 ]; then
   echo "Usage: $0 <FILE_NAME>"
   exit 1
 fi
 
 FILE_NAME="$1"
+CONV_CALCULATION="$2"
 
 # Ensure kpoints_candidate.csv exists
 if [ ! -f "kpoints_candidate.csv" ]; then
@@ -25,8 +26,19 @@ NPROCS=\$(cat \$PBS_NODEFILE | wc -l)
 
 
 
+EOF
 
+if [ $CONV_CALCULATION -eq 0 ]; then
+  python create_kpoints.py > BEST_KPOINTS.dat
+  cat >> run_vasp_KP-conv.sh <<EOF
 echo "########################################################"
+echo "          No KPOINT convergence calculation"  
+echo "########################################################"
+EOF
+  exit 1
+elif [ $CONV_CALCULATION -eq 1 ]; then
+  cat >> run_vasp_KP-conv.sh <<EOF
+
 echo "########################################################"
 echo "###  VASP calculation for KPOINTS convergence stars! ###"
 echo "########################################################"
@@ -35,8 +47,13 @@ echo "########################################################"
 cp POSCAR_distorted POSCAR
 
 # 収束判定を初期化
-
 EOF
+else
+  echo "2nd argment is wrong in create_run_vasp_KP-conv.sh"
+  exit 1
+fi
+
+
 
 i=1
 while IFS=, read -r kx ky kz; do
@@ -143,6 +160,10 @@ else
 fi
 
 
+### BEST_KPOINTSの対称性によって、INCARに追記すべき項目を作成する
+sh kp_symmetry_check.sh
+
+
 hostname
 date
 echo "#######################################################"
@@ -151,3 +172,27 @@ echo "#######################################################"
 EOF
 echo "run_vasp_KP-conv.sh file has been successfully created"
 
+
+
+cat > kp_symmetry_check.sh << EOF
+#!/bin/bash
+
+# Read data from BEST_KPOINTS.dat
+read kx ky kz < ./BEST_KPOINTS.dat
+
+# Check if the data contains three integers
+if ! [[ "\$kx" =~ ^[0-9]+$ && "\$ky" =~ ^[0-9]+$ && "\$kz" =~ ^[0-9]+$ ]]; then
+  echo "Error: The file does not contain three integers."
+  exit 1
+fi
+
+# Determine if all three numbers are equal
+if [ "\$kx" -eq "\$ky" ] && [ "\$ky" -eq "\$kz" ]; then
+  # If all numbers are equal, create an empty file
+  > INCAR_tail
+else
+  # If numbers are not equal, write specified content to the file
+  echo "ISYM = -1" > INCAR_tail
+  echo "SYMPREC = 0.00000001" >> INCAR_tail
+fi
+EOF

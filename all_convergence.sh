@@ -6,8 +6,9 @@ if [ "$#" -ne 1 ]; then
     exit 1
 fi
 FILE_REL_PATH="$1"
-RELAX="${2:-YES}" # Relax引数がなければ、デフォルトで'NO'を使用
+RELAX="${2:-NO}" # YES, or NO. Relax引数がなければ、デフォルトで'NO'を使用
 PRECISION="${3:-high}" # precision引数がなければ、デフォルトで'high'を使用
+CONV_CALCULATION="${4:-0}" # 0 or 1. 0なら収束計算を行わない。1なら収束計算を行う.
 
 # ファイルの存在を確認
 if [ ! -f "$FILE_REL_PATH" ]; then
@@ -24,6 +25,7 @@ WORK_DIR="$WORK_DIR""$(basename "$FILE_PATH")"
 mkdir -p $WORK_DIR
 cp create_conv_cpp.sh create_INCAR.sh create_POSCAR.sh create_POTCAR.sh generate_kpoints.py create_distorted_POSCAR.sh ./$WORK_DIR
 cp create_run_vasp_KP-conv.sh create_run_vasp_ENCUT-conv.sh create_run_vasp_relax.sh create_run_vasp_aft_relax_sc.sh create_run_vasp_bandgap_cal.sh calculate_bandgap.sh ./$WORK_DIR
+cp create_kpoints.py ./$WORK_DIR
 cd $WORK_DIR
 
 # 収束判定のファイルを作る
@@ -39,10 +41,10 @@ python generate_kpoints.py  $FILE_PATH
 # 収束計算用のずらしたPOSCARを作成する
 sh create_distorted_POSCAR.sh 
 ### scriptを書く
-# K点の候補ファイルをもとに、全部を計算するスクリプトを書く
-sh create_run_vasp_KP-conv.sh  $FILE_PATH
 # ENCUTの収束のスクリプトを書く
-sh create_run_vasp_ENCUT-conv.sh $FILE_PATH
+sh create_run_vasp_ENCUT-conv.sh $FILE_PATH $CONV_CALCULATION
+# K点の候補ファイルをもとに、全部を計算するスクリプトを書く
+sh create_run_vasp_KP-conv.sh  $FILE_PATH $CONV_CALCULATION
 # 緩和計算のスクリプトを書く
 sh create_run_vasp_relax.sh $RELAX
 # 緩和計算後のsc計算のスクリプトを書く
