@@ -40,10 +40,11 @@ echo ""
 
 # ENCUTの収束後値をもとに、sc計算用のINCARを作成する.
 BEST_KPOINTS=\$(cat ../BEST_KPOINTS.dat)
+MESH_METHOD=\$(cat ../mesh_method.dat)
 echo "BEST KPOINTS"
 echo "k-points" > KPOINTS
 echo "0" >> KPOINTS
-echo "Monkhorst Pack" >> KPOINTS
+echo "\$MESH_METHOD" >> KPOINTS
 echo "\$BEST_KPOINTS" >> KPOINTS
 echo "0 0 0" >> KPOINTS
 
@@ -95,11 +96,11 @@ if [ -z "\$E_fermi"]; then
     # outputが存在するかどうかをチェック
     if [ -e \$OUTPUT_FILE ]; then
         # ファイルが存在する場合、通常のlsの結果をファイルに出力
-        echo "$FILE_PATH , -1" >> \$OUTPUT_FILE
+        echo "$FILE_PATH , -1, False" >> \$OUTPUT_FILE
     else
         # ファイルが存在しない場合、隠しファイルを含むls -aの結果をファイルに出力
         echo 'file_name, bandgap, nonmetal' > \$OUTPUT_FILE
-        echo "$FILE_PATH , -1" >> \$OUTPUT_FILE
+        echo "$FILE_PATH , -1, False" >> \$OUTPUT_FILE
     fi
 else
     # outputが存在するかどうかをチェック
@@ -121,9 +122,9 @@ echo "#######################################"
 cd ../
 
 # 特定のファイル以外を削除
-#rm -rf bandgap_cal final_sc relax_cal
-#shopt -s extglob
-#rm -f !(POSCAR_gt|POSCAR_distorted|final_INCAR|final_KPOINTS|final_OUTCAR|final_DOSCAR|final_POSCAR|used_POTCAR.txt|kp_history.dat|encut_history.dat)
+rm -rf bandgap_cal final_sc relax_cal
+shopt -s extglob
+rm -f !(POSCAR_gt|POSCAR_distorted|final_INCAR|final_KPOINTS|final_OUTCAR|final_DOSCAR|final_POSCAR|used_POTCAR.txt|kp_history.dat|encut_history.dat)
 
 date
 

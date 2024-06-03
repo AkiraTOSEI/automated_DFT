@@ -29,6 +29,9 @@ echo "############################################"
 echo "###   final SC calculation after relax   ###"
 echo "############################################"
 
+# mesh 求積方法の定義
+echo "Monkhorst Pack" > mesh_method.dat
+
 
 # 最終計算用のディレクトリを作り、必要なファイルを移動させる。
 mkdir -p final_sc
@@ -73,10 +76,11 @@ cat ../incar_magmom.dat >> INCAR
 
 # ENCUTの収束後値をもとに、sc計算用のINCARを作成する.
 BEST_KPOINTS=\$(cat ../BEST_KPOINTS.dat)
+MESH_METHOD=\$(cat ../mesh_method.dat)
 echo "BEST KPOINTS"
 echo "k-points" > KPOINTS
 echo "0" >> KPOINTS
-echo "Monkhorst Pack" >> KPOINTS
+echo "\$MESH_METHOD" >> KPOINTS
 echo "\$BEST_KPOINTS" >> KPOINTS
 echo "0 0 0" >> KPOINTS
 
@@ -96,6 +100,34 @@ date
 echo "#######################################"
 echo "###            VASP ends!           ###"
 echo "#######################################"
+
+
+E_fermi=\$(grep "E-fermi" OUTCAR | awk '{print \$3}')
+if [ -z "\$E_fermi"]; then
+    echo "Gamma" > ../mesh_method.dat
+    MESH_METHOD=\$(cat ../mesh_method.dat)
+    echo "BEST KPOINTS with Gamma"
+    echo "k-points" > KPOINTS
+    echo "0" >> KPOINTS
+    echo "\$MESH_METHOD" >> KPOINTS
+    echo "\$BEST_KPOINTS" >> KPOINTS
+    echo "0 0 0" >> KPOINTS
+    
+    echo "Failure to get  Fermi Enegry. Then re-calculate again with KPOINTS-Gamma"  
+    echo "###################################################"
+    echo "###################################################"
+    echo "###  VASP calculation for final SC re-starts!   ###"
+    echo "###################################################"
+    echo "###################################################"
+    echo ""
+    
+    mpiexec -iface ib0 -launcher rsh -machinefile \$PBS_NODEFILE -ppn 16 /home/share/VASP/vasp.5.4.4
+    date
+    echo "#######################################"
+    echo "###            VASP ends!           ###"
+    echo "#######################################"
+fi
+
 
 
 cp CHGCAR ../bandgap_cal/

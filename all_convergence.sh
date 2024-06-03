@@ -25,7 +25,7 @@ WORK_DIR="$WORK_DIR""$(basename "$FILE_PATH")"
 mkdir -p $WORK_DIR
 cp create_conv_cpp.sh create_INCAR.sh create_POSCAR.sh create_POTCAR.sh generate_kpoints.py create_distorted_POSCAR.sh ./$WORK_DIR
 cp create_run_vasp_KP-conv.sh create_run_vasp_ENCUT-conv.sh create_run_vasp_relax.sh create_run_vasp_aft_relax_sc.sh create_run_vasp_bandgap_cal.sh calculate_bandgap.sh ./$WORK_DIR
-cp create_kpoints.py calculate_EDIFF.py ./$WORK_DIR
+cp create_kpoints.py calculate_EDIFF.py magmom.py ./$WORK_DIR
 cd $WORK_DIR
 
 # 収束判定のファイルを作る
