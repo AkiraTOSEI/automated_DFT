@@ -60,6 +60,9 @@ if [ $CONV_CALCULATION -eq 0 ]; then
 
 
 sh kp_symmetry_check.sh
+# mesh 求積方法の定義
+echo "Monkhorst Pack" > mesh_method.dat
+
 echo "########################################################"
 echo "          No KPOINT convergence calculation"  
 echo "########################################################"
@@ -72,6 +75,9 @@ echo "########################################################"
 echo "###  VASP calculation for KPOINTS convergence stars! ###"
 echo "########################################################"
 echo "########################################################"
+
+# mesh 求積方法の定義
+echo "Monkhorst Pack" > mesh_method.dat
 
 cp POSCAR_distorted POSCAR
 

@@ -29,8 +29,6 @@ echo "############################################"
 echo "###   final SC calculation after relax   ###"
 echo "############################################"
 
-# mesh 求積方法の定義
-echo "Monkhorst Pack" > mesh_method.dat
 
 
 # 最終計算用のディレクトリを作り、必要なファイルを移動させる。
