@@ -15,6 +15,6 @@ num_total_atoms = np.array(lines[6].strip().split(" ")).astype(int).sum()
 atom_vectors = np.array([line.split() for line in lines[8:] if line.strip()], dtype=float)
 assert len(atom_vectors) == num_total_atoms    
 
-EDIFF = base_EDIFF / num_total_atoms
+EDIFF = base_EDIFF * num_total_atoms
 
 print(f'EDIFF = {EDIFF:.2e}')

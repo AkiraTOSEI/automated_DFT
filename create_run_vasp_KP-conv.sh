@@ -15,6 +15,32 @@ if [ ! -f "kpoints_candidate.csv" ]; then
   exit 1
 fi
 
+
+
+cat > kp_symmetry_check.sh << EOF
+#!/bin/bash
+
+# Read data from BEST_KPOINTS.dat
+read kx ky kz < ./BEST_KPOINTS.dat
+
+# Check if the data contains three integers
+if ! [[ "\$kx" =~ ^[0-9]+$ && "\$ky" =~ ^[0-9]+$ && "\$kz" =~ ^[0-9]+$ ]]; then
+  echo "Error: The file does not contain three integers."
+  exit 1
+fi
+
+# Determine if all three numbers are equal
+if [ "\$kx" -eq "\$ky" ] && [ "\$ky" -eq "\$kz" ]; then
+  # If all numbers are equal, create an empty file
+  > INCAR_tail
+else
+  # If numbers are not equal, write specified content to the file
+  echo "ISYM = -1" > INCAR_tail
+  echo "SYMPREC = 0.00000001" >> INCAR_tail
+fi
+EOF
+
+
 # Start creating run_vasp_KP-conv.sh
 cat > run_vasp_KP-conv.sh <<EOF
 #!/bin/sh
@@ -23,14 +49,20 @@ cat > run_vasp_KP-conv.sh <<EOF
 cd \$PBS_O_WORKDIR
 export I_MPI_COMPATIBILITY=4
 NPROCS=\$(cat \$PBS_NODEFILE | wc -l)
-
-
-
 EOF
 
 if [ $CONV_CALCULATION -eq 0 ]; then
   python create_kpoints.py > BEST_KPOINTS.dat
   cat >> run_vasp_KP-conv.sh <<EOF
+
+
+
+
+
+sh kp_symmetry_check.sh
+# mesh 求積方法の定義
+echo "Monkhorst Pack" > mesh_method.dat
+
 echo "########################################################"
 echo "          No KPOINT convergence calculation"  
 echo "########################################################"
@@ -43,6 +75,9 @@ echo "########################################################"
 echo "###  VASP calculation for KPOINTS convergence stars! ###"
 echo "########################################################"
 echo "########################################################"
+
+# mesh 求積方法の定義
+echo "Monkhorst Pack" > mesh_method.dat
 
 cp POSCAR_distorted POSCAR
 
@@ -174,25 +209,3 @@ echo "run_vasp_KP-conv.sh file has been successfully created"
 
 
 
-cat > kp_symmetry_check.sh << EOF
-#!/bin/bash
-
-# Read data from BEST_KPOINTS.dat
-read kx ky kz < ./BEST_KPOINTS.dat
-
-# Check if the data contains three integers
-if ! [[ "\$kx" =~ ^[0-9]+$ && "\$ky" =~ ^[0-9]+$ && "\$kz" =~ ^[0-9]+$ ]]; then
-  echo "Error: The file does not contain three integers."
-  exit 1
-fi
-
-# Determine if all three numbers are equal
-if [ "\$kx" -eq "\$ky" ] && [ "\$ky" -eq "\$kz" ]; then
-  # If all numbers are equal, create an empty file
-  > INCAR_tail
-else
-  # If numbers are not equal, write specified content to the file
-  echo "ISYM = -1" > INCAR_tail
-  echo "SYMPREC = 0.00000001" >> INCAR_tail
-fi
-EOF
