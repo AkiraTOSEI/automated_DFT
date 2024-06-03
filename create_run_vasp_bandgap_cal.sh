@@ -90,15 +90,29 @@ OUTPUT_FILE="../../bandgap_result.csv"
 
 echo "E_fermi: \$E_fermi"
 
-# outputが存在するかどうかをチェック
-if [ -e \$OUTPUT_FILE ]; then
-    # ファイルが存在する場合、通常のlsの結果をファイルに出力
-    python calculate_bandgap.py -f \$E_fermi >> \$OUTPUT_FILE
+### E-fermiの値が計算できたかどうかでダミーの値をいれるかどうかを判定する
+if [ -z "\$E_fermi"]; then
+    # outputが存在するかどうかをチェック
+    if [ -e \$OUTPUT_FILE ]; then
+        # ファイルが存在する場合、通常のlsの結果をファイルに出力
+        echo "$FILE_PATH , -1" >> \$OUTPUT_FILE
+    else
+        # ファイルが存在しない場合、隠しファイルを含むls -aの結果をファイルに出力
+        echo 'file_name, bandgap, nonmetal' > \$OUTPUT_FILE
+        echo "$FILE_PATH , -1" >> \$OUTPUT_FILE
+    fi
 else
-    # ファイルが存在しない場合、隠しファイルを含むls -aの結果をファイルに出力
-    echo 'file_name, bandgap, nonmetal' > \$OUTPUT_FILE
-    python calculate_bandgap.py -f \$E_fermi >> \$OUTPUT_FILE
+    # outputが存在するかどうかをチェック
+    if [ -e \$OUTPUT_FILE ]; then
+        # ファイルが存在する場合、通常のlsの結果をファイルに出力
+        python calculate_bandgap.py -f \$E_fermi >> \$OUTPUT_FILE
+    else
+        # ファイルが存在しない場合、隠しファイルを含むls -aの結果をファイルに出力
+        echo 'file_name, bandgap, nonmetal' > \$OUTPUT_FILE
+        python calculate_bandgap.py -f \$E_fermi >> \$OUTPUT_FILE
+    fi
 fi
+
 
 echo "#######################################"
 echo "###     bandgap cpp ends!           ###"
