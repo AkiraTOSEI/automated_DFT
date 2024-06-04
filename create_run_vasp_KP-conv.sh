@@ -60,9 +60,6 @@ if [ $CONV_CALCULATION -eq 0 ]; then
 
 
 sh kp_symmetry_check.sh
-# mesh 求積方法の定義
-echo "Monkhorst Pack" > mesh_method.dat
-
 echo "########################################################"
 echo "          No KPOINT convergence calculation"  
 echo "########################################################"
@@ -76,10 +73,9 @@ echo "###  VASP calculation for KPOINTS convergence stars! ###"
 echo "########################################################"
 echo "########################################################"
 
-# mesh 求積方法の定義
-echo "Monkhorst Pack" > mesh_method.dat
 
 cp POSCAR_distorted POSCAR
+MESH_METHOD=\$(cat ./mesh_method.dat)
 
 # 収束判定を初期化
 EOF
@@ -100,7 +96,7 @@ while IFS=, read -r kx ky kz; do
 echo "Processing k-point $kx $ky $kz"
 echo "k-points" > KPOINTS
 echo "0" >> KPOINTS
-echo "Monkhorst Pack" >> KPOINTS
+echo "\$MESH_METHOD" >> KPOINTS
 echo "$kx $ky $kz" >> KPOINTS
 echo "0 0 0" >> KPOINTS
 

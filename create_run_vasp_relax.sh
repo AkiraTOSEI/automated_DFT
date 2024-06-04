@@ -39,27 +39,32 @@ elif [ "$RELAX" = "YES" ]; then
 mkdir -p relax_cal
 
 # ENCUTの収束後値をもとに、sc計算用のINCARを作成する.
+python calculate_EDIFFG.py > EDIFFG.dat
+python calculate_EDIFF.py > EDIFF.dat
 cp POSCAR_gt ./relax_cal/POSCAR
 cp POTCAR ./relax_cal
 cd ./relax_cal
 
 # ENCUTの収束後値をもとに、sc計算用のINCARを作成する.
 BEST_KPOINTS=\$(cat ../BEST_KPOINTS.dat)
+MESH_METHOD=\$(cat ../mesh_method.dat)
 echo "BEST KPOINTS"
 echo "k-points" > KPOINTS
 echo "0" >> KPOINTS
-echo "Monkhorst Pack" >> KPOINTS
+echo "\$MESH_METHOD" >> KPOINTS
 echo "\$BEST_KPOINTS" >> KPOINTS
 echo "0 0 0" >> KPOINTS
 
 # ENCUTの値をもとに、INCARファイルを作成する
 BEST_ENCUT=\$(cat ../BEST_ENCUT.dat)
+EDIFF=\$(cat ../EDIFF.dat)
+EDIFGF=\$(cat ../EDIFFG.dat)
 echo "relax structure INCAR" > INCAR
 echo "ISTART = 0" >> INCAR
 echo "ICHARG = 1" >> INCAR
-echo "ISPIN = 1" >> INCAR
+echo "ISPIN = 2" >> INCAR
 echo "\$BEST_ENCUT" >> INCAR
-echo "EDIFF = 1.0e-4" >> INCAR
+echo "\$EDIFF" >> INCAR
 echo "LWAVE = .F." >> INCAR
 echo "ISMEAR = -5" >> INCAR
 echo "SIGMA = 0.01" >> INCAR
@@ -68,9 +73,10 @@ echo "LREAL = .F." >> INCAR
 echo "NELM = 200" >> INCAR
 echo "IBRION = 2" >> INCAR
 echo "NSW = 1000" >> INCAR
-echo "EDIFFG = -1.0e-2" >> INCAR
+echo "\$EDIFF" >> INCAR
 echo "ISIF = 3" >> INCAR
 echo "NPAR = 4" >> INCAR
+cat ../incar_magmom.dat >> INCAR
 cat ../INCAR_tail >> INCAR
 
 echo "################################################"
