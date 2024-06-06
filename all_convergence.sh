@@ -8,7 +8,7 @@ fi
 FILE_REL_PATH="$1"
 RELAX="${2:-YES}" # YES, or NO. Relax引数がなければ、デフォルトで'NO'を使用
 PRECISION="${3:-high}" # precision引数がなければ、デフォルトで'high'を使用
-CONV_CALCULATION="${4:-0}" # 0 or 1. 0なら収束計算を行わない。1なら収束計算を行う.
+CONV_CALCULATION="${4:-1}" # 0 or 1. 0なら収束計算を行わない。1なら収束計算を行う.
 
 # ファイルの存在を確認
 if [ ! -f "$FILE_REL_PATH" ]; then
@@ -19,10 +19,12 @@ fi
 # パスを絶対パスに変換する
 FILE_PATH=$(realpath "$FILE_REL_PATH")
 
-# working dirctoryを作ってそこで作業を行う
+# working dirctoryを作ってそこで作業を行う。なお、そのディレクトリに存在したファイルなどは削除する
 WORK_DIR="workspace__"
 WORK_DIR="$WORK_DIR""$(basename "$FILE_PATH")"
 mkdir -p $WORK_DIR
+rm -rf $WORK_DIR/*
+
 cp create_conv_cpp.sh create_INCAR.sh create_POSCAR.sh create_POTCAR.sh generate_kpoints.py create_distorted_POSCAR.sh ./$WORK_DIR
 cp create_run_vasp_test_sc.sh create_run_vasp_KP-conv.sh create_run_vasp_ENCUT-conv.sh create_run_vasp_relax.sh create_run_vasp_aft_relax_sc.sh create_run_vasp_bandgap_cal.sh calculate_bandgap.sh ./$WORK_DIR
 cp create_kpoints.py calculate_EDIFF.py calculate_EDIFFG.py magmom.py ./$WORK_DIR
