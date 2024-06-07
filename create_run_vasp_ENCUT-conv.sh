@@ -20,6 +20,9 @@ NPROCS=\$(cat \$PBS_NODEFILE | wc -l)
 
 
 
+
+
+
 EOF
 
 
@@ -53,14 +56,21 @@ fi
 
 cat >> run_vasp_ENCUT-conv.sh <<EOF
 
-cp POSCAR_distorted POSCAR
 
-### create KPOINTS file
-echo "k-point initial"
+mkdir -p ENCUT_convergence
+cp POTCAR  ./ENCUT_convergence
+cp POSCAR_distorted ./ENCUT_convergence/POSCAR
+cp convergence_checker.cpp l2_norm.cpp convergence_summary.cpp ./ENCUT_convergence/
+cd ENCUT_convergence
+
+# ENCUTの収束後値をもとに、sc計算用のINCARを作成する.
+BEST_KPOINTS=\$(cat ../BEST_KPOINTS.dat)
+MESH_METHOD=\$(cat ../mesh_method.dat)
+echo "BEST KPOINTS"
 echo "k-points" > KPOINTS
 echo "0" >> KPOINTS
-echo "Monkhorst Pack" >> KPOINTS
-tail -n 1 kpoints_candidate.csv | tr ',' ' ' >> KPOINTS
+echo "\$MESH_METHOD" >> KPOINTS
+echo "\$BEST_KPOINTS" >> KPOINTS
 echo "0 0 0" >> KPOINTS
 
 EOF
@@ -75,6 +85,12 @@ echo "ENCUT $FILE_NAME" > INCAR
 echo "ISTART = 0 ; ICHARG = 2" >> INCAR
 echo "ENCUT = $cutoff" >> INCAR
 echo "ISMEAR = 0; SIGMA = 0.1" >> INCAR
+echo "PREC = accurate" >> INCAR
+echo "ISPIN = 2" >> INCAR
+echo "\$EDIFF" >> INCAR
+cat ../INCAR_tail >> INCAR
+cat ../incar_magmom.dat >> INCAR
+
 
 ### calculcation
 mpiexec -iface ib0 -launcher rsh -machinefile \$PBS_NODEFILE -ppn 16 /home/share/VASP/vasp.5.4.4
@@ -147,26 +163,9 @@ fi
 hostname
 date
 
-
-##### 収束した値に従い、INCARを修正する
-# INCARファイルの内容を定義
-echo "INCAR with BEST ENCUT" > INCAR
-echo "ISTART = 0 ; ICHARG = 2" >> INCAR
-echo "ENCUT = \$BEST_ENCUT" >> INCAR
-echo "ISMEAR = -5; SIGMA = 0.1" >> INCAR
-echo "PREC = accurate" >> INCAR
-echo "EDIFF = 1.0e-6 # default:10^-4, SCF計算の収束条件,推奨は1E-6らしい。" >> INCAR
-echo "ISYM = -1" >> INCAR 
-echo "SYMPREC = 0.00000001" >> INCAR
-
-echo "INCAR file has been successfully created."
-
-echo "#######################################################"
-echo "###  VASP calculation for ENCUT convergence ends!   ###"
-echo "#######################################################"
+mv *.dat ../
+cd ../
 EOF
-
-
 
 echo "run_vasp_ENCUT-conv.sh file has been successfully created"
 

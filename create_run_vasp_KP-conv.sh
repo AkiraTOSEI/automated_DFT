@@ -28,16 +28,6 @@ if ! [[ "\$kx" =~ ^[0-9]+$ && "\$ky" =~ ^[0-9]+$ && "\$kz" =~ ^[0-9]+$ ]]; then
   echo "Error: The file does not contain three integers."
   exit 1
 fi
-
-# Determine if all three numbers are equal
-if [ "\$kx" -eq "\$ky" ] && [ "\$ky" -eq "\$kz" ]; then
-  # If all numbers are equal, create an empty file
-  > INCAR_tail
-else
-  # If numbers are not equal, write specified content to the file
-  echo "ISYM = -1" > INCAR_tail
-  echo "SYMPREC = 0.00000001" >> INCAR_tail
-fi
 EOF
 
 
@@ -74,8 +64,27 @@ echo "########################################################"
 echo "########################################################"
 
 
-cp POSCAR_distorted POSCAR
 MESH_METHOD=\$(cat ./mesh_method.dat)
+
+mkdir -p KP_convergence
+cp POTCAR  ./KP_convergence
+cp POSCAR_distorted ./KP_convergence/POSCAR
+cp convergence_checker.cpp l2_norm.cpp convergence_summary.cpp ./KP_convergence/
+cd KP_convergence
+
+
+# create INCAR
+EDIFF=\$(cat ../EDIFF.dat)
+echo "final sc-calculation INCAR" > INCAR
+echo "ISTART = 0 ; ICHARG = 2" >> INCAR
+echo 800 >> INCAR
+echo "ISMEAR = -5; SIGMA = 0.1" >> INCAR
+echo "PREC = accurate" >> INCAR
+echo "ISPIN = 2" >> INCAR
+echo "\$EDIFF" >> INCAR
+cat ../INCAR_tail >> INCAR
+cat ../incar_magmom.dat >> INCAR
+
 
 # 収束判定を初期化
 EOF
@@ -190,6 +199,9 @@ else
   # ここにBEST_KPOINTSファイル用の処理を書く
 fi
 
+### 計算のホームディレクトリへと戻る
+cp *.dat ../
+cd ../
 
 ### BEST_KPOINTSの対称性によって、INCARに追記すべき項目を作成する
 sh kp_symmetry_check.sh

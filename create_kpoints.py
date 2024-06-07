@@ -12,7 +12,7 @@ kpoint_density = 4000
 # 2行目から4行目の結晶ベクトルを読み込む
 crystal_vectors = np.array([line.split() for line in lines[2:5]], dtype=float)
 num_total_atoms = np.array(lines[6].strip().split(" ")).astype(int).sum()
-atom_vectors = np.array([line.split() for line in lines[8:] if line.strip()], dtype=float)
+atom_vectors = np.array([line.split()[:3] for line in lines[8:] if line.strip()], dtype=float)
 assert len(atom_vectors) == num_total_atoms     
 
 # K点の密度に沿って、KPOINTSファイルに書き込むファイルを作る。

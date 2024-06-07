@@ -67,7 +67,6 @@ echo "\$BEST_ENCUT" >> INCAR
 echo "ISMEAR = -5; SIGMA = 0.1" >> INCAR
 echo "PREC = accurate" >> INCAR
 echo "ISPIN = 2" >> INCAR
-echo "ISPIN = 2" >> INCAR
 echo "\$EDIFF" >> INCAR
 cat ../INCAR_tail >> INCAR
 cat ../incar_magmom.dat >> INCAR
