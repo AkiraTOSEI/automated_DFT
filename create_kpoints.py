@@ -17,7 +17,7 @@ assert len(atom_vectors) == num_total_atoms
 
 # K点の密度に沿って、KPOINTSファイルに書き込むファイルを作る。
 crystal_vectors_length = np.sqrt(np.sum(np.square(crystal_vectors),axis=1))
-norm_ratio = crystal_vectors_length /np.max(crystal_vectors_length )
+norm_ratio = (1./crystal_vectors_length) /np.max(crystal_vectors_length )
 base_val = np.power(kpoint_density/num_total_atoms/np.prod(norm_ratio), 1./3.)
 best_kpoints = np.round(base_val*norm_ratio).astype(np.int64)
 
