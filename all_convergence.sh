@@ -6,7 +6,7 @@ if [ "$#" -ne 1 ]; then
     exit 1
 fi
 FILE_REL_PATH="$1"
-RELAX="${2:-YES}" # YES, or NO. Relax引数がなければ、デフォルトで'NO'を使用
+RELAX="${2:-NO}" # YES, or NO. Relax引数がなければ、デフォルトで'NO'を使用
 PRECISION="${3:-high}" # precision引数がなければ、デフォルトで'high'を使用
 CONV_CALCULATION="${4:-1}" # 0 or 1. 0なら収束計算を行わない。1なら収束計算を行う.
 

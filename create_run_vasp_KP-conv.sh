@@ -69,15 +69,16 @@ MESH_METHOD=\$(cat ./mesh_method.dat)
 mkdir -p KP_convergence
 cp POTCAR  ./KP_convergence
 cp POSCAR_distorted ./KP_convergence/POSCAR
-cp convergence_checker.cpp l2_norm.cpp convergence_summary.cpp ./KP_convergence/
+cp convergence_checker.cpp l2_norm.cpp convergence_summary.cpp calculate_vol.cpp ./KP_convergence/
 cd KP_convergence
 
 
 # create INCAR
 EDIFF=\$(cat ../EDIFF.dat)
+BEST_ENCUT=\$(cat ../BEST_ENCUT.dat)
 echo "final sc-calculation INCAR" > INCAR
 echo "ISTART = 0 ; ICHARG = 2" >> INCAR
-echo 800 >> INCAR
+echo "\$BEST_ENCUT" >> INCAR
 echo "ISMEAR = -5; SIGMA = 0.1" >> INCAR
 echo "PREC = accurate" >> INCAR
 echo "ISPIN = 2" >> INCAR
