@@ -66,8 +66,8 @@ echo "ISPIN = 2" >> INCAR
 echo "\$BEST_ENCUT" >> INCAR
 echo "\$EDIFF" >> INCAR
 echo "LWAVE = .F." >> INCAR
-echo "ISMEAR = -5" >> INCAR
-echo "SIGMA = 0.01" >> INCAR
+echo "ISMEAR = 0" >> INCAR
+echo "SIGMA = 0.03" >> INCAR
 echo "PREC = accurate" >> INCAR
 echo "LREAL = .F." >> INCAR
 echo "NELM = 200" >> INCAR
@@ -76,6 +76,8 @@ echo "NSW = 1000" >> INCAR
 echo "\$EDIFF" >> INCAR
 echo "ISIF = 3" >> INCAR
 echo "NPAR = 4" >> INCAR
+echo "NCORE = 8 #" >> INCAR
+echo "KPAR = 4 # defalut:コア数、並列計算に使うコア数" >> INCAR
 cat ../incar_magmom.dat >> INCAR
 cat ../INCAR_tail >> INCAR
 

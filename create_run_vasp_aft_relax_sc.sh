@@ -64,8 +64,10 @@ EDIFF=\$(cat ../EDIFF.dat)
 echo "final sc-calculation INCAR" > INCAR
 echo "ISTART = 0 ; ICHARG = 2" >> INCAR
 echo "\$BEST_ENCUT" >> INCAR
-echo "ISMEAR = -5; SIGMA = 0.1" >> INCAR
+echo "ISMEAR = 0; SIGMA = 0.03" >> INCAR
 echo "PREC = accurate" >> INCAR
+echo "NCORE = 8 #" >> INCAR
+echo "KPAR = 4 # defalut:コア数、並列計算に使うコア数" >> INCAR
 echo "ISPIN = 2" >> INCAR
 echo "\$EDIFF" >> INCAR
 cat ../INCAR_tail >> INCAR

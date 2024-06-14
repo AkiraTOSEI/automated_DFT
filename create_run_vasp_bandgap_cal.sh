@@ -58,12 +58,13 @@ echo "ICHARG = 11 #default:2(ISTART=0)0,else:0, 0:初期波動関数から電荷
 echo "ISPIN = 2 # default:1, 1:スピン分極なし、2:スピン分極あり" >> INCAR
 echo "\$BEST_ENCUT" >> INCAR
 echo "LWAVE = .F. # WAVECARを出力するか" >> INCAR
-echo "ISMEAR = -5 # default:1,部分占有軌道の設定、絶縁体・半導体では-5を推奨 " >> INCAR
-echo "#SIGMA = 0.01 # default:0.2, smearingの幅、系の事前知識がないときはISMEAR=0でSIGMA=0.03~0.05 " >> INCAR
+echo "ISMEAR = 0 # default:1,部分占有軌道の設定、絶縁体・半導体では-5を推奨 " >> INCAR
+echo "SIGMA = 0.03 # default:0.2, smearingの幅、系の事前知識がないときはISMEAR=0でSIGMA=0.03~0.05 " >> INCAR
 echo "PREC = accurate" >> INCAR
 echo "LREAL = .F. # 精度の指定。default NORMAL" >> INCAR
 echo "NELM = 200 # default:60, SC計算の最大回数を指定" >> INCAR
-#echo "NPAR = 4 # defalut:コア数、並列計算に使うコア数" >> INCAR
+echo "NCORE = 8 #" >> INCAR
+echo "KPAR = 4 # defalut:コア数、並列計算に使うコア数" >> INCAR
 echo "LORBIT = 11 # default: None, 11:DOSCAR, PROCARを出力" >> INCAR
 echo "NEDOS = 2000 #default:301, DOS計算のグリッド数" >> INCAR
 echo \$EDIFF >> INCAR
@@ -156,23 +157,33 @@ def analyze_dos(e_fermi=None):
     # Get the energy, DOS(UP), DOS(DOWN) of the first point above the Fermi level
     energy, dup, ddown = dos[dos['AboveEf']].head(1)[['Energy', 'DOS(UP)', 'DOS(DOWN)']].values.tolist()[0]
     
-    if dup > 0 or ddown > 0:
+    if (dup1 > eps and dup2 > 0) or (ddown1 > eps and ddown2 > 0):
+        # どうあがいても金属
         non_metal = False
         band_gap = 0
+        print('$FILE_PATH' ,f', {band_gap:.3f}, {non_metal}')
+        return
+            
+    elif 0 < dup1 <= eps and 0 < ddown1 < eps:
+        # ギリギリ許容範囲
+        dos['AboveEf'] = dos['Energy'] - energy2 > 0
     else:
-        non_metal = True
-        
-        # Get Energy of the top of the valence band
-        top_VB_idx = dos[dos['AboveEf']].index[0] - 1
-        top_VB_energy = dos['Energy'].loc[top_VB_idx]
-        
-        # Get Energy of the bottom of the conduction band
-        dos_above_Ef = dos[dos['AboveEf']][['Energy', 'DOS(UP)', 'DOS(DOWN)']]
-        dos_above_Ef['state_exist'] = (dos_above_Ef[['DOS(UP)', 'DOS(DOWN)']] > 0).any(axis=1)
-        bottom_CB_energy = dos_above_Ef[dos_above_Ef['state_exist']].head(1)['Energy'].values[0]
-        
-        band_gap = bottom_CB_energy - top_VB_energy
+        dos['AboveEf'] = dos['Energy'] - energy1 > 0
     
+    non_metal = True
+    # dup1 < eps and ddown < eps の場合は許容する
+    
+    # Get Energy of the top of the valence band
+    top_VB_idx = dos[dos['AboveEf']].index[0] - 1
+    top_VB_energy = dos['Energy'].loc[top_VB_idx]
+    
+    # Get Energy of the bottom of the conduction band
+    dos_above_Ef = dos[dos['AboveEf']][['Energy', 'DOS(UP)', 'DOS(DOWN)']]
+    dos_above_Ef['state_exist'] = (dos_above_Ef[['DOS(UP)', 'DOS(DOWN)']] > 0).any(axis=1)
+    bottom_CB_energy = dos_above_Ef[dos_above_Ef['state_exist']].head(1)['Energy'].values[0]
+    
+    band_gap = bottom_CB_energy - top_VB_energy
+ 
     print('$FILE_PATH' ,f', {band_gap:.3f}, {non_metal}')
 
 def main():
