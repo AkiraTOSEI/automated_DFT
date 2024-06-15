@@ -7,7 +7,7 @@ file_path = 'POSCAR_gt'  # このパスを実際のファイルパスに置き�
 with open(file_path, 'r') as file:
     lines = file.readlines()
 
-    base_EDIFF = 1E-4
+    base_EDIFF = -1E-3
 
 # 2行目から4行目の結晶ベクトルを読み込む
 crystal_vectors = np.array([line.split() for line in lines[2:5]], dtype=float)
